@@ -1,13 +1,20 @@
 package com.project.SpringCafeUI.entity;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Date;
 
+
 @Setter
 @Getter
 public class Order {
+
     private int id;
     private Date date;
     private double totalDue;

@@ -1,16 +1,33 @@
 package com.project.SpringCafeUI.entity;
 
 
+import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+//@Entity
+//@Data
+//@Table(name = "account")
 @Setter
 @Getter
 public class Account {
+
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @Column(name = "id")
     private int id;
+
+//    @Column(name = "username", columnDefinition = "TEXT", nullable = false)
     private String username;
+
+//    @Column(name = "password", columnDefinition = "Text", nullable = false)
     private String password;
+
+//    @Column(name = "partition", columnDefinition = "TEXT" , nullable = false)
     private int partition;
+
+
     private Employee employee;
 
     public Account() {}

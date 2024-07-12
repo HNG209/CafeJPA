@@ -1,13 +1,17 @@
 package com.project.SpringCafeUI.entity;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
 public class Drink {
+
     private int id;
+
     private String name;
+
     private	Category category;
     private double unitPrice;
     private String note;

@@ -112,7 +112,7 @@ public class EmployeeController implements ActionListener, MouseListener, Docume
 		String sexString = employeePage.getSexDfComboBoxModel().getSelectedItem().toString().trim();
 		boolean sex = false;
 		String title = employeePage.getTitleDfComboBoxModel().getSelectedItem().toString().trim();
-		String salaryString = employeePage.getSalaryJTextField().getText().toString().trim();
+		String salaryString = employeePage.getSalaryJTextField().getText().trim();
 		double salary = 0;
 		String startDate = employeePage.getStartDateJTextField().getText().trim();
 		Date date = Date.valueOf(startDate);
@@ -166,8 +166,8 @@ public class EmployeeController implements ActionListener, MouseListener, Docume
 			}
 		}
 		
-		sex = sexString.equalsIgnoreCase("Nữ") ? true : false;
-		status = statusString.equalsIgnoreCase("Đang làm việc") ? true : false;
+		sex = sexString.equalsIgnoreCase("Nữ");
+		status = statusString.equalsIgnoreCase("Đang làm việc");
 		
 		return new Employee(id, name, age, sex, title, salary, date, status);
 	}

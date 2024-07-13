@@ -4,33 +4,34 @@ package com.project.SpringCafeUI.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-//@Entity
-//@Data
-//@Table(name = "account")
+@Entity
+@Data
+@Table(name = "account")
 @Setter
 @Getter
+@NoArgsConstructor
 public class Account {
 
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @Column(name = "id")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
 
-//    @Column(name = "username", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "username", columnDefinition = "TEXT", nullable = false)
     private String username;
 
-//    @Column(name = "password", columnDefinition = "Text", nullable = false)
+    @Column(name = "password", columnDefinition = "TEXT", nullable = false)
     private String password;
 
-//    @Column(name = "partition", columnDefinition = "TEXT" , nullable = false)
+    @Column(name = "`partition`" , nullable = false)
     private int partition;
 
-
+    @OneToOne
+    @JoinColumn(name = "employee_id")
     private Employee employee;
-
-    public Account() {}
 
     public Account(int id, String username, String password, int partition, Employee employee) {
         this.setId(id);

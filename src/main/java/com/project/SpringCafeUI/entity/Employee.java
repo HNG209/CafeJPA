@@ -3,15 +3,18 @@ package com.project.SpringCafeUI.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
 @Table(name = "employee")
 @Setter
 @Getter
+@NoArgsConstructor
 public class Employee {
 
     @Id
@@ -35,10 +38,13 @@ public class Employee {
     private double salary;
 
     @Column(columnDefinition = "DATE", nullable = false)
-    private Date startDate;//start_date
+    private Date startDate;
 
     @Column(name = "status", columnDefinition = "BOOLEAN", nullable = false)
     private boolean status;
+
+    @OneToMany(mappedBy = "employee")
+    private List<Order> orders;
 
     public Employee(int id, String name, int age, boolean sex, String title, double salary,
                     Date startDate, boolean status) {
@@ -51,7 +57,5 @@ public class Employee {
         this.setStartDate(startDate);
         this.setStatus(status);
     }
-
-    public Employee() {}
 
 }

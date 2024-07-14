@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.text.DecimalFormat;
 
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
@@ -19,6 +20,8 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import com.project.SpringCafeUI.controller.EmployeeController;
+import com.project.SpringCafeUI.entity.Employee;
+import com.project.SpringCafeUI.repository.EmployeeRepository;
 import com.project.SpringCafeUI.utils.FontSize;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,10 +51,12 @@ public class EmployeePage {
     private final Font font16 = FontSize.fontPlain16();
     private final Color color = Color.WHITE;
     private final JPanel employeePanel;
+    private final EmployeeRepository repository;
 
     @Autowired
-    public EmployeePage(@Lazy EmployeeController employeeController) {
+    public EmployeePage(@Lazy EmployeeController employeeController, EmployeeRepository repository) {
         this.employeeController = employeeController;
+        this.repository = repository;
         employeePanel = new JPanel();
         this.setJPanel();
         this.setComponents();
@@ -250,7 +255,32 @@ public class EmployeePage {
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         table.setFont(FontSize.fontPlain16());
         table.addMouseListener(employeeController);
-        employeeController.loadTable();
+        this.loadTable();//first load
+    }
+
+    //Load one row table
+    private void loadOneRow(Employee employee) {
+        DecimalFormat formater = new DecimalFormat("#.0");
+        this.dfTableModel.addRow(new Object[] {
+                employee.getId(),
+                employee.getName(),
+                employee.getAge(),
+                employee.isSex() ? "Nữ" : "Nam",
+                employee.getRole(),
+                formater.format(employee.getSalary()),
+                employee.getStartDate(),
+                employee.isStatus() ? "Đang làm việc" : "Ngưng làm việc"
+        });
+    }
+
+    public void loadTable(){
+        this.getDfTableModel().setRowCount(0);
+        repository.findAll().forEach(this::loadOneRow);
+    }
+
+    public void loadTable(String name){
+        this.getDfTableModel().setRowCount(0);
+        repository.findByNameContaining(name).forEach(this::loadOneRow);
     }
 
     private void setJPanel() {

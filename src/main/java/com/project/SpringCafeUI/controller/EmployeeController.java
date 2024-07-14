@@ -14,6 +14,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
 import com.project.SpringCafeUI.entity.Employee;
+import com.project.SpringCafeUI.repository.EmployeeRepository;
 import com.project.SpringCafeUI.utils.TextProcessing;
 import com.project.SpringCafeUI.view.EmployeePage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,12 @@ import org.springframework.stereotype.Component;
 public class EmployeeController implements ActionListener, MouseListener, DocumentListener {
 
 	private final EmployeePage employeePage;
+	private final EmployeeRepository repository;
 
 	@Autowired
-	public EmployeeController(@Lazy EmployeePage employeePage) {
+	public EmployeeController(@Lazy EmployeePage employeePage, EmployeeRepository repository) {
         this.employeePage = employeePage;
+        this.repository = repository;
     }
 
 	@Override
@@ -46,13 +49,17 @@ public class EmployeeController implements ActionListener, MouseListener, Docume
 	
 	private void addEmployee() {
 		Employee employee = this.getEmployee();
-//		if (employee != null) {
-//			EmployeeDAO employeeDAO = new EmployeeDAO();
-//			employeeDAO.addEmployee(employee);
-//			showMessage("Thông báo", "Thêm thành công", JOptionPane.PLAIN_MESSAGE);
-//			resetTable();
-//			loadTable();
-//		}
+		if(employee.getId() != 0){
+			if(showConfirm("xác nhận", "thêm 1 nhân viên với ID khác hiện tại?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
+				employee.setId(0);
+			}
+			else return;
+		}
+		if (employee != null) {
+			repository.save(employee);
+			employeePage.loadTable();
+			showMessage("Thông báo", "Thêm thành công", JOptionPane.PLAIN_MESSAGE);
+		}
 	}
 	
 	private void updateEmployee() {
@@ -63,16 +70,11 @@ public class EmployeeController implements ActionListener, MouseListener, Docume
 			int option = showConfirm("Thông báo", "Bạn chắc chắn muốn cập nhật?", JOptionPane.YES_NO_OPTION);
 			if (option == JOptionPane.YES_OPTION) {
 				Employee employee = this.getEmployee();
+				System.out.println(employee);
 				if (employee != null) {
-//					EmployeeDAO employeeDAO = new EmployeeDAO();
-//					boolean check = employeeDAO.updateEmployee(employee);
-//					if (check) {
-//						showMessage("Thông báo", "Cập nhật thành công", JOptionPane.PLAIN_MESSAGE);
-//						resetTable();
-//						loadTable();
-//					} else {
-//						showMessage("Thông báo", "Cập nhật thất bại", JOptionPane.PLAIN_MESSAGE);
-//					}
+					repository.save(employee);
+					employeePage.loadTable();
+					showMessage("Thông báo", "Cập nhật thành công", JOptionPane.PLAIN_MESSAGE);
 				}
 			}
 		}
@@ -93,12 +95,11 @@ public class EmployeeController implements ActionListener, MouseListener, Docume
 	}
 	
 	private void searchEmployee() {
-		resetTable();
 		String searchText = employeePage.getSearchJTextField().getText().trim();
 		if (searchText.isBlank()) {
-			loadTable();
+			employeePage.loadTable();
 		} else {
-			loadTable(searchText);
+			employeePage.loadTable(searchText);
 		}
 	}
 	//Tạo một nhân viên
@@ -115,7 +116,7 @@ public class EmployeeController implements ActionListener, MouseListener, Docume
 		String salaryString = employeePage.getSalaryJTextField().getText().trim();
 		double salary = 0;
 		String startDate = employeePage.getStartDateJTextField().getText().trim();
-		Date date = Date.valueOf(startDate);
+		Date date = Date.valueOf(startDate.split(" ")[0]);
 		String statusString = employeePage.getStatusDfComboBoxModel().getSelectedItem().toString().trim();
 		boolean status = false;
 		
@@ -124,7 +125,8 @@ public class EmployeeController implements ActionListener, MouseListener, Docume
 		}
 		
 		if (startDate.isBlank()) {
-			date = Date.valueOf(LocalDate.now());
+			LocalDate localDate = LocalDate.now();
+			date = Date.valueOf(localDate);
 		}
 		
 		if (name.isBlank()) {
@@ -173,49 +175,7 @@ public class EmployeeController implements ActionListener, MouseListener, Docume
 	}
 	
 	//End tạo một nhân viên
-	
-	//Reset table
-	private void resetTable() {
-		employeePage.getDfTableModel().setRowCount(0);
-		employeePage.getTable().repaint();
-	}
-	//End reset table
-	
-	//Load one row table
-	private void loadOneRow(DefaultTableModel dfTableModel, Employee employee) {
-		DecimalFormat formater = new DecimalFormat("#.0");
-		dfTableModel.addRow(new Object[] {
-			employee.getId(),
-			employee.getName(),
-			employee.getAge(),
-			employee.isSex() ? "Nữ" : "Nam",
-			employee.getTitle(),
-			formater.format(employee.getSalary()),
-			employee.getStartDate(),
-			employee.isStatus() ? "Đang làm việc" : "Ngưng làm việc"
-		});
-	}
-	//End load one row table
-	
-	//Load table
-	public void loadTable() {
-//		EmployeeDAO employeeDAO = new EmployeeDAO();
-//		employeeDAO.getEmployees().stream()
-//			.forEach(employee -> loadOneRow(
-//				employeePage.getDfTableModel(), employee)
-//			);
-	}
-	
-	private void loadTable(String name) {
-//		EmployeeDAO employeeDAO = new EmployeeDAO();
-//
-//		employeeDAO.getEmployees().stream()
-//			.filter(employee -> TextProcessing.formatString(employee.getName()).contains(TextProcessing.formatString(name)))
-//			.forEach(employee -> loadOneRow(
-//				employeePage.getDfTableModel(), employee)
-//		);
-	}
-	//End load table
+
 	
 	//Show message
 	private void showMessage(String title, String message, int option) {

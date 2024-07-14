@@ -2,10 +2,7 @@ package com.project.SpringCafeUI.entity;
 
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Data
@@ -13,6 +10,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
+@ToString
 public class Account {
 
     @Id
@@ -42,13 +40,10 @@ public class Account {
     }
 
     public boolean checkLogin(String username, String password) {
-        if (this.username.equalsIgnoreCase(username) && this.password.equalsIgnoreCase(password) && employee.isStatus()) {
-            if (this.employee.isStatus()) {
-                return true;
-            }
-        }
-        return false;
+//        return this.username.equalsIgnoreCase(username) && this.password.equalsIgnoreCase(password) && employee.isStatus();
+        return employee.isStatus();
     }
+
 
 }
 

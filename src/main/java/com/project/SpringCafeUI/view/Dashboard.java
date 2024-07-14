@@ -237,13 +237,6 @@ public class Dashboard {
         cardLayout = new CardLayout();
         cardPanel.setLayout(cardLayout);
 
-        //JPanel homeJPanel = HomePage.getInstance();
-        //JPanel sellJPanel = SellPage.getInstace();
-        //JPanel billJPanel = BillPage.getInstance();
-        //JPanel productJPanel = ProductPage.getInstace();
-        //JPanel employeeJPanel = EmployeePage.getInstance();
-        //JPanel statisticsJPanel = StatisticsPage.getInstance();
-
         cardPanel.add(homePage.getHomePanel(), "Trang chủ");
         cardPanel.add(sellPage.getSellPanel(), "Đơn đặt");
         cardPanel.add(billPage.getBillPanel(), "Hóa đơn");

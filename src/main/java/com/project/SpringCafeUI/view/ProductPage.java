@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.util.Objects;
+import java.util.Optional;
 
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
@@ -22,6 +24,10 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
 import com.project.SpringCafeUI.controller.ProductPageController;
+import com.project.SpringCafeUI.entity.Category;
+import com.project.SpringCafeUI.entity.Drink;
+import com.project.SpringCafeUI.repository.CategoryRepository;
+import com.project.SpringCafeUI.repository.DrinkRepository;
 import com.project.SpringCafeUI.utils.BorderRadius;
 import com.project.SpringCafeUI.utils.FontSize;
 import lombok.Getter;
@@ -66,6 +72,8 @@ public class ProductPage {
     private final ProductPageController productPageController;
     private final Font font = FontSize.fontPlain16();
 
+    private final CategoryRepository categoryRepository;
+    private final DrinkRepository drinkRepository;
     private final JPanel productPanel;
 
 //    private static ProductPage INSTANCE = new ProductPage();
@@ -75,8 +83,10 @@ public class ProductPage {
 //    }
 
     @Autowired
-    public ProductPage(@Lazy ProductPageController productPageController) {
+    public ProductPage(@Lazy ProductPageController productPageController, CategoryRepository categoryRepository, DrinkRepository drinkRepository) {
         this.productPageController = productPageController;
+        this.categoryRepository = categoryRepository;
+        this.drinkRepository = drinkRepository;
         productPanel = new JPanel();
         this.setPanel();
         this.setComponents();
@@ -237,7 +247,63 @@ public class ProductPage {
         statusSubJComboBox.setBackground(Color.WHITE);
         statusSubJComboBox.addActionListener(productPageController);
 
-        productPageController.loadComboBoxCategory();
+        this.loadComboBoxCategory();
+    }
+
+    public void loadComboBoxCategory() {
+        categoryRepository.findAll().
+                forEach(category -> {
+                    this.getDfCategoryJComboBoxModel().addElement(category.getName());
+                    this.getDfCategorySubJComboBoxModel().addElement(category.getName());
+                });
+    }
+
+    private void loadOneRow(Drink drink) {
+        getDfDefaultTableModel().addRow(new Object[] {
+                drink.getId(),
+                drink.getName(),
+                drink.getCategory().getName(),
+                drink.getUnitPrice(),
+                drink.isStatus() ? "Ngừng bán" : "Đang bán"
+        });
+    }
+
+    public void loadTable() {
+        getDfDefaultTableModel().setRowCount(0);
+        drinkRepository.findAll().forEach(this::loadOneRow);
+    }
+
+    public void loadTable(String name) {
+        getDfDefaultTableModel().setRowCount(0);
+        drinkRepository.findByNameContaining(name).forEach(this::loadOneRow);
+    }
+
+    public void loadTableByCategory(String value) {
+        getDfDefaultTableModel().setRowCount(0);
+        Category tmp = categoryRepository.findByName(value).get(0);
+        if(tmp != null){
+            drinkRepository.findByCategory(tmp).forEach(this::loadOneRow);
+        }
+    }
+
+    public void loadTableByStatus(String value) {
+        getDfDefaultTableModel().setRowCount(0);
+        drinkRepository.findByStatus(Objects.equals(value, "Ngừng bán")).forEach(this::loadOneRow);
+    }
+
+    public void loadTextfield(int row){
+        Optional<Drink> drink = drinkRepository.findById(Integer.parseInt(getDfDefaultTableModel().getValueAt(row, 0).toString()));
+        if(drink.isPresent()){
+            DefaultTableModel model = getDfDefaultTableModel();
+            this.getIdJTextField().setText(model.getValueAt(row, 0).toString());
+            this.getNameJTextField().setText(model.getValueAt(row, 1).toString());
+            this.getDfCategoryJComboBoxModel().setSelectedItem(model.getValueAt(row, 2).toString());
+            this.getUnitPriceJTextField().setText(model.getValueAt(row, 3).toString());
+            this.getDescribeJTextArea().setText(drink.get().getDescription());
+            this.getNoteJTextArea().setText(drink.get().getNote());
+            this.getDfStatusJBoxModel().setSelectedItem(model.getValueAt(row, 4));
+            this.getImageJLabel().setIcon(new ImageIcon(String.format(drink.get().getPathImage(), 100)));
+        }
     }
 
     private void setJTable() {
@@ -247,7 +313,7 @@ public class ProductPage {
         table.setAutoCreateRowSorter(false);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         table.setFont(FontSize.fontPlain16());
-        productPageController.loadTable();
+        this.loadTable();
 
         table.addMouseListener(productPageController);
     }

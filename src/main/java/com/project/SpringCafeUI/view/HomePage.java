@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
@@ -21,15 +22,21 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import com.project.SpringCafeUI.controller.HomePageController;
+import com.project.SpringCafeUI.entity.Category;
+import com.project.SpringCafeUI.entity.Drink;
+import com.project.SpringCafeUI.repository.CategoryRepository;
+import com.project.SpringCafeUI.repository.DrinkRepository;
 import com.project.SpringCafeUI.utils.BorderRadius;
 import com.project.SpringCafeUI.utils.FontSize;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
 @Getter
+@Setter
 public class HomePage {
     //For drink table
     private JLabel searchJLabel, categoryJLabel;
@@ -55,17 +62,15 @@ public class HomePage {
     private final Font font = FontSize.fontPlain16();
     private final Color color = Color.WHITE;
 
-//    private static HomePage INSTANCE = new HomePage();
-//
-//    public static HomePage getInstance() {
-//        return INSTANCE;
-//    }
-
     private final JPanel homePanel;
+    private final CategoryRepository categoryRepository;
+    private final DrinkRepository drinkRepository;
 
     @Autowired
-    public HomePage(@Lazy HomePageController homePageController) {
+    public HomePage(@Lazy HomePageController homePageController, CategoryRepository categoryRepository, DrinkRepository drinkRepository) {
         this.homePageController = homePageController;
+        this.categoryRepository = categoryRepository;
+        this.drinkRepository = drinkRepository;
         homePanel = new JPanel();
         this.setJPanel();
         this.setComponents();
@@ -108,7 +113,7 @@ public class HomePage {
         boxMain.add(boxCategory);
         boxMain.add(Box.createVerticalStrut(10));
 
-        homePanel.add(boxMain);
+        panel.add(boxMain);
 
         homePanel.add(panel, BorderLayout.NORTH);
 
@@ -117,7 +122,7 @@ public class HomePage {
     private void setWest() {
         JPanel panel = new JPanel();
         panel.setPreferredSize(new Dimension(260, 0));
-//		panel.setBorder(BorderFactory.createEtchedBorder());
+		panel.setBorder(BorderFactory.createEtchedBorder());
         Box boxMain = Box.createVerticalBox();
         boxMain.add(Box.createVerticalStrut(10));
         boxMain.add(imageJLabel);
@@ -320,7 +325,7 @@ public class HomePage {
         drinkJTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         drinkJTable.addMouseListener(homePageController);
         drinkJTable.setFont(FontSize.fontPlain16());
-        homePageController.loadTable();
+        this.loadTable();
 
         String[] headerBill = "Tên món;Đơn giá;Số lượng".split(";");
         dfBillDefaultTableModel = new DefaultTableModel(headerBill, 0);
@@ -338,9 +343,50 @@ public class HomePage {
         categoryJComboBox.setFont(font);
         categoryJComboBox.addItem("Tất cả");
         categoryJComboBox.addActionListener(homePageController);
-        homePageController.loadComboBoxCategory();
+        this.loadComboBoxCategory();
 
         categoryJComboBox.setBackground(color);
+    }
+
+    public void loadComboBoxCategory() {
+        categoryRepository.findAll().forEach(
+                category -> {
+				this.getDfCategoryComboBoxModel().addElement(category.getName());
+			}
+        );
+    }
+
+    //Load one row table
+    private void loadOneRow(Drink drink) {
+        this.dfDrinkTableModel.addRow(new Object[] {
+                drink.getId(),
+                drink.getName(),
+                drink.getCategory().getName(),
+                drink.getUnitPrice(),
+        });
+    }
+    //End load one row table
+
+    public void loadTableByCategory(String value) {
+        this.dfDrinkTableModel.setRowCount(0);
+        Category category = categoryRepository.findByName(value).get(0);
+        if(category != null){
+            drinkRepository.findByCategory(category).forEach(this::loadOneRow);
+        }
+    }
+    //End load Table
+
+    //Load Table
+    public void loadTable() {//refresh
+        this.dfDrinkTableModel.setRowCount(0);
+        drinkRepository.findAll().stream()
+                .filter(drink -> !drink.isStatus())
+                .forEach(this::loadOneRow);
+    }
+
+    public void loadTable(String name) {
+        this.dfDrinkTableModel.setRowCount(0);
+        drinkRepository.findByNameContaining(name).forEach(this::loadOneRow);
     }
 
     private void setJPanel() {

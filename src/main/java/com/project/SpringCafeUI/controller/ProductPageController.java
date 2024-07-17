@@ -27,15 +27,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductPageController implements ActionListener, MouseListener, DocumentListener {
 	private final ProductPage productPage;
-	private HomePage homePage;
 	private final CategoryRepository categoryRepository;
 	private final DrinkRepository drinkRepository;
+	private final HomePage homePage;
 
 	@Autowired
-	public ProductPageController(@Lazy ProductPage productPage, CategoryRepository categoryRepository, DrinkRepository drinkRepository) {
+	public ProductPageController(@Lazy ProductPage productPage, CategoryRepository categoryRepository, DrinkRepository drinkRepository, HomePage homePage) {
         this.productPage = productPage;
         this.categoryRepository = categoryRepository;
         this.drinkRepository = drinkRepository;
+        this.homePage = homePage;
     }
 
 	@Override
@@ -66,15 +67,12 @@ public class ProductPageController implements ActionListener, MouseListener, Doc
 			productPage.getImageJLabel().setIcon(new ImageIcon(path));
 			drink.setPathImage(ImageDisplay.formatPath(path));
 
-//			DrinkDAO drinkDAO = new DrinkDAO();
-//			boolean check = drinkDAO.addDrink(drink);
 			drinkRepository.save(drink);
 
             showMessage("Thông báo", "Thêm thành công", JOptionPane.PLAIN_MESSAGE);
             productPage.loadTable();
 
-//            homePage.getHomePageController().resetTableDrink();
-//            homePage.getHomePageController().loadTable();
+			homePage.loadTable();
         }
 	}
 	//End add drink
@@ -97,6 +95,7 @@ public class ProductPageController implements ActionListener, MouseListener, Doc
 					}
 					drinkRepository.save(drink);
 					productPage.loadTable();
+					homePage.loadTable();
 					showMessage("Thông báo", "Cập nhật thành công", JOptionPane.PLAIN_MESSAGE);
 				}
 			}
@@ -198,6 +197,9 @@ public class ProductPageController implements ActionListener, MouseListener, Doc
 		boolean status = statusString.equalsIgnoreCase("Đang bán") ? false : true;
 
 		String path = "";
+		if(id != 0){
+			path = drinkRepository.findById(id).get().getPathImage();
+		}
 
 		return new Drink(id, name, category, unitPrice, note, description, status, path);
 	}

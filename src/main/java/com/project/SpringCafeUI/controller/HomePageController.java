@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Optional;
 
 
 import javax.swing.ImageIcon;
@@ -13,6 +14,9 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
 import com.project.SpringCafeUI.entity.Drink;
+import com.project.SpringCafeUI.repository.CategoryRepository;
+import com.project.SpringCafeUI.repository.DrinkRepository;
+import com.project.SpringCafeUI.view.CardNumberPage;
 import com.project.SpringCafeUI.view.HomePage;
 import com.project.SpringCafeUI.view.SellPage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +27,16 @@ import org.springframework.stereotype.Component;
 public class HomePageController implements ActionListener, MouseListener, DocumentListener{
 	private final HomePage homePage;
 	private final SellPage sellPage;
+	private final DrinkRepository drinkRepository;
+	private final CardNumberPage cardNumberPage;
 
 	@Autowired
-	public HomePageController(@Lazy HomePage homePage,@Lazy SellPage sellPage) {
+	public HomePageController(@Lazy HomePage homePage, @Lazy SellPage sellPage, DrinkRepository drinkRepository, CardNumberPage cardNumberPage) {
 		this.homePage = homePage;
         this.sellPage = sellPage;
-	}
+        this.drinkRepository = drinkRepository;
+        this.cardNumberPage = cardNumberPage;
+    }
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -84,10 +92,10 @@ public class HomePageController implements ActionListener, MouseListener, Docume
 		String option = homePage.getDfCategoryComboBoxModel().getSelectedItem().toString();
 		if (option.equalsIgnoreCase("Tất cả")) {
 			resetTableDrink();
-			loadTable();
+			homePage.loadTable();
 		} else {
 			resetTableDrink();
-			loadTableByCategory(option);
+			homePage.loadTableByCategory(option);
 		}
 	}
 	
@@ -185,6 +193,9 @@ public class HomePageController implements ActionListener, MouseListener, Docume
 	
 	//Confirm
 	private void confirm() {
+		if (homePage.getCardNumberValueJLabel().getText().isBlank()) {
+			cardNumberPage.show();
+		}
 //		try {
 //
 //			if (homePage.getCardNumberValueJLabel().getText().isBlank()) {
@@ -242,59 +253,7 @@ public class HomePageController implements ActionListener, MouseListener, Docume
 //		}
 	}
 	//End confirm
-	
-	//Load comboBox category
-	public void loadComboBoxCategory() {
-//		CategoryDAO categoryDAO = new CategoryDAO();
-//		categoryDAO.getCategories().stream()
-//			.forEach(category -> {
-//				homePage.getDfCategoryComboBoxModel().addElement(category.getName());
-//			}
-//		);
-	}
-	//End load comboBox category
-	
-	//Load one row table
-	private void loadOneRow(DefaultTableModel dfTableModel, Drink drink) {
-		dfTableModel.addRow(new Object[] {
-			drink.getId(),
-			drink.getName(),
-			drink.getCategory().getName(),
-			drink.getUnitPrice(),
-		});
-	}
-	//End load one row table
-	
-	//Load Table
-	public void loadTable() {
-//		DrinkDAO drinkDAO = new DrinkDAO();
-//		drinkDAO.getDrinks().stream()
-//			.filter(drink -> !drink.isStatus())
-//			.forEach(drink -> loadOneRow(
-//				homePage.getDfDrinkTableModel(), drink)
-//			);
-	}
-	
-	private void loadTable(String name) {
-//		DrinkDAO drinkDAO = new DrinkDAO();
-//
-//		drinkDAO.getDrinks().stream()
-//			.filter(drink -> TextProcessing.formatString(drink.getName()).contains(TextProcessing.formatString(name)))
-//			.forEach(drink -> loadOneRow(
-//				homePage.getDfDrinkTableModel(), drink)
-//		);
-	}
-	
-	private void loadTableByCategory(String value) {
-//		DrinkDAO drinkDAO = new DrinkDAO();
-//
-//		drinkDAO.getDrinks().stream()
-//			.filter(drink -> drink.getCategory().getName().equalsIgnoreCase(value))
-//			.forEach(drink -> loadOneRow(
-//				homePage.getDfDrinkTableModel(), drink)
-//		);
-	}
-	//End load Table
+
 	
 	//Reset table
 	public void resetTableDrink() {
@@ -333,14 +292,16 @@ public class HomePageController implements ActionListener, MouseListener, Docume
 			homePage.getDeleteJButton().setEnabled(true);
 		}
 		if(o.equals(homePage.getDrinkJTable())) {
-//			DrinkDAO drinkDAO = new DrinkDAO();
-//			Drink drink = drinkDAO.getDrink("id", dfDrink.getValueAt(homePage.getDrinkJTable().getSelectedRow(), 0).toString().trim());
-//			homePage.getImageJLabel().setIcon(new ImageIcon(String.format(drink.getPathImage(), 200)));
-//			homePage.getNameJLabel().setText(drink.getName());
-//			homePage.getUnitPriceJLabel().setText("" + drink.getUnitPrice());
-//			homePage.getArrowLeftJButton().setEnabled(true);
-//			homePage.getArrowRightJButton().setEnabled(true);
-//			homePage.getAddJButton().setEnabled(true);
+			int id = Integer.parseInt(dfDrink.getValueAt(homePage.getDrinkJTable().getSelectedRow(), 0).toString().trim());
+			Optional<Drink> drink = drinkRepository.findById(id);
+			if(drink.isPresent()){
+				homePage.getImageJLabel().setIcon(new ImageIcon(String.format(drink.get().getPathImage(), 200)));
+				homePage.getNameJLabel().setText(drink.get().getName());
+				homePage.getUnitPriceJLabel().setText("" + drink.get().getUnitPrice());
+				homePage.getArrowLeftJButton().setEnabled(true);
+				homePage.getArrowRightJButton().setEnabled(true);
+				homePage.getAddJButton().setEnabled(true);
+			}
 		}
 	}
 
@@ -376,9 +337,9 @@ public class HomePageController implements ActionListener, MouseListener, Docume
 			String name = homePage.getSearchJTextField().getText().trim();
 			resetTableDrink();
 			if (name.isBlank()) {
-				loadTable();
+				homePage.loadTable();
 			} else {
-				loadTable(name);
+				homePage.loadTable(name);
 			}
 		} else {
 			if (source.equals(homePage.getPayByEmployeeJTextField().getDocument())) {
@@ -412,9 +373,9 @@ public class HomePageController implements ActionListener, MouseListener, Docume
 			String name = homePage.getSearchJTextField().getText().trim();
 			resetTableDrink();
 			if (name.isBlank()) {
-				loadTable();
+				homePage.loadTable();
 			} else {
-				loadTable(name);
+				homePage.loadTable(name);
 			}
 		} else {
 			if (source.equals(homePage.getPayByEmployeeJTextField().getDocument())) {

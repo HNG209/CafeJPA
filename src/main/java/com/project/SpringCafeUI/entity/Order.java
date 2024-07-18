@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "`order`")
@@ -39,6 +40,9 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
+
+    @OneToMany(mappedBy = "order")
+    private List<OrderDetail> orderDetails;
 
     public Order(int id, Date date, double totalDue, boolean status, String description, Card card,
                  Employee employee) {

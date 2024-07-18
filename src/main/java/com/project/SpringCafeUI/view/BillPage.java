@@ -19,6 +19,10 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import com.project.SpringCafeUI.controller.BillPageController;
+import com.project.SpringCafeUI.entity.Order;
+import com.project.SpringCafeUI.entity.OrderDetail;
+import com.project.SpringCafeUI.repository.OrderDetailRepository;
+import com.project.SpringCafeUI.repository.OrderRepository;
 import com.project.SpringCafeUI.utils.FontSize;
 import com.project.SpringCafeUI.utils.DateTime;
 import lombok.Getter;
@@ -46,10 +50,14 @@ public class BillPage {
     private Color color = Color.WHITE;
 
     private final JPanel billPanel;
+    private final OrderRepository orderRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     @Autowired
-    public BillPage(@Lazy BillPageController billPageController) {
+    public BillPage(@Lazy BillPageController billPageController, OrderRepository orderRepository, OrderDetailRepository orderDetailRepository) {
         this.billPageController = billPageController;
+        this.orderRepository = orderRepository;
+        this.orderDetailRepository = orderDetailRepository;
         billPanel = new JPanel();
         this.setJPanel();
         this.setComponents();
@@ -176,7 +184,7 @@ public class BillPage {
         orderJTable.setAutoCreateRowSorter(false);
         orderJTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         orderJTable.setFont(FontSize.fontPlain16());
-        billPageController.loadTableOrder();
+        this.loadTableOrder();
         orderJTable.addMouseListener(billPageController);
 
         String[] headerDrink = "Tên món;Đơn giá;Số lượng".split(";");
@@ -232,7 +240,38 @@ public class BillPage {
         yearJChecked.setForeground(color);
     }
 
+    //Load one row table
+    private void loadOneRowOrder(Order order) {
+        dfOrderTableModel.addRow(new Object[] {
+                order.getId(),
+                order.getDate(),
+                order.getEmployee().getName(),
+                order.getTotalDue(),
+                order.isStatus() ? "Hoàn thành" : "Đang chờ"
+        });
+    }
 
+    //Load table
+    public void loadTableOrder() {
+        orderRepository.findAll().forEach(this::loadOneRowOrder);
+    }
+
+    private void loadOneRowDrink(OrderDetail orderDetail) {
+        dfDrinkTableModel.addRow(new Object[] {
+                orderDetail.getDrink().getName(),
+                orderDetail.getDrink().getUnitPrice(),
+                orderDetail.getQuantity()
+        });
+    }
+    //End load one row table
+
+    public void loadTableDrink(int id) {
+        dfDrinkTableModel.setRowCount(0);
+
+        Order order = orderRepository.findById(id).get();
+        orderDetailRepository.findByOrder(order).forEach(this::loadOneRowDrink);
+    }
+    //End load table
 
     public void loadDayJComboBox() {
         String keyString = this.getMmJComboBox().getSelectedItem().toString();

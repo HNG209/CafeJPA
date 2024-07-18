@@ -19,14 +19,14 @@ public class OrderDetail {
     private int id;
 
     private double unitPrice;
-    private int quantity;
+    private int quantity;//quantity for each drink
     private double discount;
 
     @ManyToOne
     @JoinColumn(name = "drink_id")
     private Drink drink;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
 

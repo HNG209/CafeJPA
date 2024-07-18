@@ -41,7 +41,7 @@ public class Dashboard {
             statisticalJButton,
             employeeJButton;
     private JButton logOutJButton;
-    private JLabel nameJLabel, positionJLabel;
+    private JLabel nameJLabel, positionJLabel, employeeIDJLabel;
     private JLabel timeJLabel, dateJLabel;
     private CardLayout cardLayout;
     private JPanel cardPanel;
@@ -154,11 +154,15 @@ public class Dashboard {
     }
 
     private void setLabel() {
-        nameJLabel = new JLabel("Võ Triều An");
+        nameJLabel = new JLabel();
         nameJLabel.setFont(FontSize.fontBold16());
         nameJLabel.setForeground(fontColor);
 
-        positionJLabel = new JLabel("Quản lý");
+        employeeIDJLabel = new JLabel();
+        employeeIDJLabel.setFont(FontSize.fontBold16());
+        employeeIDJLabel.setForeground(fontColor);
+
+        positionJLabel = new JLabel();
         positionJLabel.setFont(FontSize.fontBold16());
         positionJLabel.setForeground(fontColor);
 
@@ -176,14 +180,23 @@ public class Dashboard {
         //West panel
         JPanel contentTitlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 8));
         contentTitlePanel.add(logOutJButton);
-        contentTitlePanel.add(nameJLabel);
-        contentTitlePanel.setBackground(backgroundColor);
 
         JLabel line = new JLabel("-");
         line.setFont(FontSize.fontBold16());
         line.setForeground(fontColor);
+
+        JLabel textID = new JLabel("Mã nhân viên:");
+        textID.setFont(FontSize.fontBold16());
+        textID.setForeground(fontColor);
+        contentTitlePanel.add(textID);
+        contentTitlePanel.add(employeeIDJLabel);
+
+        contentTitlePanel.add(nameJLabel);
+        contentTitlePanel.setBackground(backgroundColor);
+
         contentTitlePanel.add(line);
         contentTitlePanel.add(positionJLabel);
+
         titleJPanel.add(contentTitlePanel, BorderLayout.WEST);
         //End west panel
 

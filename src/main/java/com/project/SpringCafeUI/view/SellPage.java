@@ -16,6 +16,10 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import com.project.SpringCafeUI.controller.SellPageController;
+import com.project.SpringCafeUI.entity.Order;
+import com.project.SpringCafeUI.entity.OrderDetail;
+import com.project.SpringCafeUI.repository.OrderDetailRepository;
+import com.project.SpringCafeUI.repository.OrderRepository;
 import com.project.SpringCafeUI.utils.FontSize;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,11 +41,15 @@ public class SellPage{
     private Font fontB24 = FontSize.fontBold24();
 
     private final JPanel sellPanel;
+    private final OrderRepository orderRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
 
     @Autowired
-    public SellPage(@Lazy SellPageController sellPageController) {
+    public SellPage(@Lazy SellPageController sellPageController, OrderRepository orderRepository, OrderDetailRepository orderDetailRepository) {
         this.sellPageController = sellPageController;
+        this.orderRepository = orderRepository;
+        this.orderDetailRepository = orderDetailRepository;
         this.sellPanel = new JPanel();
 
         this.setJPanel();
@@ -124,7 +132,7 @@ public class SellPage{
         orderJTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         orderJTable.addMouseListener(sellPageController);
         orderJTable.setFont(FontSize.fontPlain16());
-        sellPageController.loadTableOrder();
+        this.loadTableOrder();
 
         String[] headerDrink = "Tên món;Đơn giá;Số lượng".split(";");
         dfDrinkTableModel = new DefaultTableModel(headerDrink, 0);
@@ -133,6 +141,42 @@ public class SellPage{
         drinkJTable.setFont(FontSize.fontPlain16());
         drinkJTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
     }
+
+    //Load one row table
+    private void loadOneRowOrder(Order order) {
+        dfOrderTableModel.addRow(new Object[] {
+                order.getId(),
+                order.getCard().getNumber(),
+                order.getDate(),
+                order.getEmployee().getName(),
+                order.getTotalDue()
+        });
+    }
+
+    //Load table
+    public void loadTableOrder() {
+        dfOrderTableModel.setRowCount(0);
+        orderRepository.findAll().stream()
+                .filter(order -> !order.isStatus())
+                .forEach(this::loadOneRowOrder);
+    }
+
+    private void loadOneRowDrink(OrderDetail orderDetail) {
+        dfDrinkTableModel.addRow(new Object[] {
+                orderDetail.getDrink().getName(),
+                orderDetail.getDrink().getUnitPrice(),
+                orderDetail.getQuantity()
+        });
+    }
+    //End load one row table
+
+    public void loadTableDrink(int id) {
+        dfDrinkTableModel.setRowCount(0);
+
+        Order order = orderRepository.findById(id).get();
+        orderDetailRepository.findByOrder(order).forEach(this::loadOneRowDrink);
+    }
+    //End load table
 
     private void setJPanel() {
         sellPanel.setLayout(new BorderLayout());

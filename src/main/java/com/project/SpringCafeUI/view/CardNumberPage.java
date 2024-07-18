@@ -30,11 +30,10 @@ public class CardNumberPage {
     private final int size;
     private final JFrame frame;
 
-
     private final HomePage homePage;
 
     @Autowired
-    public CardNumberPage(@Lazy CardNumberController cardNumberController,@Lazy HomePage homePage) {
+    public CardNumberPage(@Lazy CardNumberController cardNumberController, HomePage homePage) {
         size = cardNumberController.getCards().size();
         this.cardNumberController = cardNumberController;
         this.homePage = homePage;
@@ -66,6 +65,16 @@ public class CardNumberPage {
                 buttons[i].setEnabled(false);
             }
             buttons[i].addActionListener(cardNumberController);
+        }
+    }
+
+    public void update(){
+        for(int i = 0;i < size; i++){
+            boolean status = cardNumberController.getCards().get(i).isStatus();
+
+            if (!status) {
+                buttons[i].setEnabled(false);
+            }
         }
     }
 

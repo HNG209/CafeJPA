@@ -67,6 +67,7 @@ public class LoginController implements ActionListener {
 				loginPage.getFrame().dispose();
 				dashboard.getNameJLabel().setText(account.getEmployee().getName());
 				dashboard.getPositionJLabel().setText(account.getEmployee().getRole());
+				dashboard.getEmployeeIDJLabel().setText(String.valueOf(account.getEmployee().getId()));
 				dashboard.getFrame().setVisible(true);
 
 				//Phân vùng

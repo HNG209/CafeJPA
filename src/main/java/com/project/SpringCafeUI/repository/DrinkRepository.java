@@ -10,4 +10,5 @@ public interface DrinkRepository extends JpaRepository<Drink, Integer> {
     List<Drink> findByNameContaining(String name);
     List<Drink> findByCategory(Category category);
     List<Drink> findByStatus(boolean status);
+    List<Drink> findByName(String name);
 }

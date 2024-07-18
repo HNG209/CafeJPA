@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Optional;
 
 
@@ -13,10 +15,10 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
-import com.project.SpringCafeUI.entity.Drink;
-import com.project.SpringCafeUI.repository.CategoryRepository;
-import com.project.SpringCafeUI.repository.DrinkRepository;
+import com.project.SpringCafeUI.entity.*;
+import com.project.SpringCafeUI.repository.*;
 import com.project.SpringCafeUI.view.CardNumberPage;
+import com.project.SpringCafeUI.view.Dashboard;
 import com.project.SpringCafeUI.view.HomePage;
 import com.project.SpringCafeUI.view.SellPage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,15 +29,26 @@ import org.springframework.stereotype.Component;
 public class HomePageController implements ActionListener, MouseListener, DocumentListener{
 	private final HomePage homePage;
 	private final SellPage sellPage;
+	private final Dashboard dashboard;
+
 	private final DrinkRepository drinkRepository;
 	private final CardNumberPage cardNumberPage;
+	private final CardRepository cardRepository;
+	private final EmployeeRepository employeeRepository;
+	private final OrderRepository orderRepository;
+	private final OrderDetailRepository orderDetailRepository;
 
 	@Autowired
-	public HomePageController(@Lazy HomePage homePage, @Lazy SellPage sellPage, DrinkRepository drinkRepository, CardNumberPage cardNumberPage) {
+	public HomePageController(@Lazy HomePage homePage, SellPage sellPage, DrinkRepository drinkRepository, CardNumberPage cardNumberPage, CardRepository cardRepository, EmployeeRepository employeeRepository, Dashboard dashboard, OrderRepository orderRepository, OrderDetailRepository orderDetailRepository) {
 		this.homePage = homePage;
         this.sellPage = sellPage;
         this.drinkRepository = drinkRepository;
         this.cardNumberPage = cardNumberPage;
+        this.cardRepository = cardRepository;
+        this.employeeRepository = employeeRepository;
+        this.dashboard = dashboard;
+        this.orderRepository = orderRepository;
+        this.orderDetailRepository = orderDetailRepository;
     }
 
 	@Override
@@ -195,6 +208,54 @@ public class HomePageController implements ActionListener, MouseListener, Docume
 	private void confirm() {
 		if (homePage.getCardNumberValueJLabel().getText().isBlank()) {
 			cardNumberPage.show();
+		}
+		else{
+			int rows = homePage.getDfBillDefaultTableModel().getRowCount();
+
+			if(rows == 0){
+				showMessage("Thông báo", "chưa có món được chọn!", JOptionPane.PLAIN_MESSAGE);
+				return;
+			}
+
+			Date date = Date.valueOf(LocalDate.now());
+			double total = Double.parseDouble(homePage.getTotalValueJLabel().getText().trim());
+			boolean status = false;
+			Card card = cardRepository.findByNumber(Integer.parseInt(homePage.getCardNumberValueJLabel().getText())).get(0);
+			Optional<Employee> employee = employeeRepository.findById(Integer.parseInt(dashboard.getEmployeeIDJLabel().getText()));
+
+			//save an order with status is set to false(not done)
+			Order order = new Order();
+
+			order.setDate(date);
+			order.setDescription("");
+			order.setStatus(status);
+			order.setTotalDue(total);
+			order.setCard(card);
+			order.setEmployee(employee.get());
+			orderRepository.save(order);
+
+			//save each order details to an order
+			for(int i = 0; i < rows; i++){
+				String drinkName = homePage.getDfBillDefaultTableModel().getValueAt(i, 0).toString();
+				int quantity = Integer.parseInt(homePage.getDfBillDefaultTableModel().getValueAt(i, 2).toString());
+				Drink drink = drinkRepository.findByName(drinkName).get(0);
+
+				OrderDetail detail = new OrderDetail();
+
+				detail.setDiscount(0.0);
+				detail.setUnitPrice(drink.getUnitPrice());
+				detail.setQuantity(quantity);
+				detail.setDrink(drink);
+				detail.setOrder(order);
+
+				orderDetailRepository.save(detail);
+			}
+
+			card.setStatus(false);
+			cardRepository.save(card);
+			cardNumberPage.update();
+			sellPage.loadTableOrder();//refresh
+			showMessage("Thông báo", "Xác nhận thanh toán thành công", JOptionPane.PLAIN_MESSAGE);
 		}
 //		try {
 //

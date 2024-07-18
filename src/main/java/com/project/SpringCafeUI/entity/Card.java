@@ -1,6 +1,7 @@
 package com.project.SpringCafeUI.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +9,7 @@ import lombok.Setter;
 @Table(name = "card")
 @Setter
 @Getter
+@AllArgsConstructor
 public class Card {
 
     @Id
@@ -23,8 +25,7 @@ public class Card {
     public Card() {
 
     }
-    public Card(int id, int number, boolean status) {
-        this.setId(id);
+    public Card(int number, boolean status) {
         this.setNumber(number);
         this.setStatus(status);
     }

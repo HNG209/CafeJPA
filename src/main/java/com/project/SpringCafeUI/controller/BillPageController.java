@@ -148,44 +148,8 @@ public class BillPageController implements ActionListener, MouseListener {
         billPage.getDdDefaultComboBoxModel().setSelectedItem(dayString);
         billPage.getMmDefaultComboBoxModel().setSelectedItem(monthString);
     }
-    //Load one row table
-    private void loadOneRowOrder(DefaultTableModel dfTableModel, Order order) {
-        dfTableModel.addRow(new Object[] {
-                order.getId(),
-                order.getDate(),
-                order.getEmployee().getName(),
-                order.getTotalDue(),
-                order.isStatus() ? "Hoàn thành" : "Đang chờ"
-        });
-    }
 
-    private void loadOneRowDrink(DefaultTableModel dfTableModel, OrderDetail orderDetail) {
-        dfTableModel.addRow(new Object[] {
-                orderDetail.getDrink().getName(),
-                orderDetail.getDrink().getUnitPrice(),
-                orderDetail.getQuantity()
-        });
-    }
-    //End load one row table
 
-    //Load table
-    public void loadTableOrder() {
-//        OrderDAO orderDAO = new OrderDAO();
-//        orderDAO.getOrders().stream()
-//                .forEach(order -> loadOneRowOrder(
-//                        billPage.getDfOrderTableModel(), order)
-//                );
-    }
-
-    public void loadTableDrink(int id) {
-//        OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
-//        orderDetailDAO.getListOrderDetail("idOrder", id).stream()
-//                .filter(orderDetail -> orderDetail.getOrder().getId() == id)
-//                .forEach(orderDetail -> loadOneRowDrink(
-//                        billPage.getDfDrinkTableModel(), orderDetail)
-//                );
-    }
-    //End load table
 
     //Reset table
     public void resetTableDrink() {
@@ -217,7 +181,7 @@ public class BillPageController implements ActionListener, MouseListener {
             billPage.getDeleteJButton().setEnabled(true);
             resetTableDrink();
             int row = billPage.getOrderJTable().getSelectedRow();
-            loadTableDrink(Integer.parseInt(billPage.getOrderJTable().getValueAt(row, 0).toString()));
+            billPage.loadTableDrink(Integer.parseInt(billPage.getOrderJTable().getValueAt(row, 0).toString()));
         }
     }
 

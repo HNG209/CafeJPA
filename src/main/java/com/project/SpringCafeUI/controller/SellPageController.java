@@ -100,46 +100,7 @@ public class SellPageController implements ActionListener, MouseListener {
 			}
 		}
 	}
-	
-	//Load one row table
-	private void loadOneRowOrder(DefaultTableModel dfTableModel, Order order) {
-		dfTableModel.addRow(new Object[] {
-			order.getId(),
-			order.getCard().getNumber(),
-			order.getDate(),
-			order.getEmployee().getName(),
-			order.getTotalDue()
-		});
-	}
-	
-	private void loadOneRowDrink(DefaultTableModel dfTableModel, OrderDetail orderDetail) {
-		dfTableModel.addRow(new Object[] {
-			orderDetail.getDrink().getName(),
-			orderDetail.getDrink().getUnitPrice(),
-			orderDetail.getQuantity()
-		});
-	}
-	//End load one row table
-	
-	//Load table
-	public void loadTableOrder() {
-//		OrderDAO orderDAO = new OrderDAO();
-//		orderDAO.getOrders().stream()
-//			.filter(order -> !order.isStatus())
-//			.forEach(order -> loadOneRowOrder(
-//				sellPage.getDfOrderTableModel(), order)
-//			);
-	}
-	
-	public void loadTableDrink(int id) {
-//		OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
-//		orderDetailDAO.getListOrderDetail("idOrder", id).stream()
-//			.filter(orderDetail -> orderDetail.getOrder().getId() == id)
-//			.forEach(orderDetail -> loadOneRowDrink(
-//				sellPage.getDfDrinkTableModel(), orderDetail)
-//			);
-	}
-	//End load table
+
 	
 
 	//Reset table
@@ -173,7 +134,7 @@ public class SellPageController implements ActionListener, MouseListener {
 			sellPage.getCancelJButton().setEnabled(true);
 			resetTableDrink();
 			int row = sellPage.getOrderJTable().getSelectedRow();
-			loadTableDrink(Integer.parseInt(sellPage.getOrderJTable().getValueAt(row, 0).toString()));
+			sellPage.loadTableDrink(Integer.parseInt(sellPage.getOrderJTable().getValueAt(row, 0).toString()));
 		}
 	}
 

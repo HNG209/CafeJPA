@@ -253,6 +253,7 @@ public class BillPage {
 
     //Load table
     public void loadTableOrder() {
+        dfOrderTableModel.setRowCount(0);
         orderRepository.findAll().forEach(this::loadOneRowOrder);
     }
 

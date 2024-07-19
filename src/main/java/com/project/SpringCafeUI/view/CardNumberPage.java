@@ -61,9 +61,7 @@ public class CardNumberPage {
 
             boolean status = cardNumberController.getCards().get(i).isStatus();
 
-            if (!status) {
-                buttons[i].setEnabled(false);
-            }
+            buttons[i].setEnabled(status);
             buttons[i].addActionListener(cardNumberController);
         }
     }
@@ -71,10 +69,7 @@ public class CardNumberPage {
     public void update(){
         for(int i = 0;i < size; i++){
             boolean status = cardNumberController.getCards().get(i).isStatus();
-
-            if (!status) {
-                buttons[i].setEnabled(false);
-            }
+            buttons[i].setEnabled(status);
         }
     }
 

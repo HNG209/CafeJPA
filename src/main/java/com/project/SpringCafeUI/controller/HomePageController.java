@@ -21,6 +21,7 @@ import com.project.SpringCafeUI.view.CardNumberPage;
 import com.project.SpringCafeUI.view.Dashboard;
 import com.project.SpringCafeUI.view.HomePage;
 import com.project.SpringCafeUI.view.SellPage;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -205,6 +206,7 @@ public class HomePageController implements ActionListener, MouseListener, Docume
 	//End delete
 	
 	//Confirm
+	@Transactional
 	private void confirm() {
 		if (homePage.getCardNumberValueJLabel().getText().isBlank()) {
 			cardNumberPage.show();

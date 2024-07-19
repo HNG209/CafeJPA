@@ -1,15 +1,17 @@
 package com.project.SpringCafeUI.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "card")
 @Setter
 @Getter
 @AllArgsConstructor
+@ToString
+@NoArgsConstructor
 public class Card {
 
     @Id
@@ -22,9 +24,10 @@ public class Card {
 
     @Column(name = "status", nullable = false)
     private boolean status;
-    public Card() {
 
-    }
+    @OneToMany(mappedBy = "card", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<Order> orders;//1 tag can be assigned with many orders
+
     public Card(int number, boolean status) {
         this.setNumber(number);
         this.setStatus(status);

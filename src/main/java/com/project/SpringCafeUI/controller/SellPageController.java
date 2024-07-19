@@ -4,13 +4,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
+import com.project.SpringCafeUI.entity.Card;
 import com.project.SpringCafeUI.entity.Order;
 import com.project.SpringCafeUI.entity.OrderDetail;
+import com.project.SpringCafeUI.repository.CardRepository;
+import com.project.SpringCafeUI.repository.OrderDetailRepository;
+import com.project.SpringCafeUI.repository.OrderRepository;
+import com.project.SpringCafeUI.view.BillPage;
+import com.project.SpringCafeUI.view.CardNumberPage;
 import com.project.SpringCafeUI.view.SellPage;
+import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -18,11 +27,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class SellPageController implements ActionListener, MouseListener {
 	private final SellPage sellPage;
-//	private final BillPage billPage;
+	private final BillPage billPage;
+	private final CardNumberPage cardNumberPage;
+
+	private final OrderRepository orderRepository;
+	private final OrderDetailRepository orderDetailRepository;
+	private final CardRepository cardRepository;
+
 
 	@Autowired
-	public SellPageController(@Lazy SellPage sellPage) {
+	public SellPageController(@Lazy SellPage sellPage, OrderRepository orderRepository, BillPage billPage, CardNumberPage cardNumberPage, OrderDetailRepository orderDetailRepository, CardRepository cardRepository) {
 		this.sellPage = sellPage;
+        this.orderRepository = orderRepository;
+        this.billPage = billPage;
+        this.cardNumberPage = cardNumberPage;
+        this.orderDetailRepository = orderDetailRepository;
+        this.cardRepository = cardRepository;
     }
 
 	@Override
@@ -36,7 +56,8 @@ public class SellPageController implements ActionListener, MouseListener {
 			}
 		}
 	}
-	
+
+	@Transactional
 	private void done() {
 		int row = sellPage.getOrderJTable().getSelectedRow();
 		if (row < 0) {
@@ -45,29 +66,35 @@ public class SellPageController implements ActionListener, MouseListener {
 			int option = showConfirm("Thông báo", "Xác nhận hoàn thành?", JOptionPane.YES_NO_OPTION);
 			if (option == JOptionPane.YES_OPTION) {
 //				OrderDAO orderDAO = new OrderDAO();
-//				int id = Integer.parseInt(sellPage.getOrderJTable().getValueAt(row, 0).toString());
-//				Order order = orderDAO.getOrder("id", id);
-//
-//				//Cập nhật trạng thái là 1 vì đã hoàn thành
-//				orderDAO.updateStatus(order.getId(), true);
-//				// End cập nhật trạng thái là 1
-//
-//				//Cập nhật lại card
-//				CardDAO cardDAO = new CardDAO();
-//				cardDAO.updateStatus(order.getCard().getId(), true);
-				//End cập nhật lại card
-				
+				int id = Integer.parseInt(sellPage.getOrderJTable().getValueAt(row, 0).toString());
+				Order order = orderRepository.findById(id).get();
+
+				order.setStatus(true);//set order status to true(done)
+
+				Card card = order.getCard();
+				card.setStatus(true);
+				cardRepository.save(card);//make the tag available again
+				cardNumberPage.update();
+
+				orderRepository.save(order);
+
+				billPage.loadTableOrder();//reload order table on billpage
+
+
 				sellPage.getDfOrderTableModel().removeRow(row);
 				resetTableDrink();
-				
-				//Load lại hóa đơn bên trang hóa đơn
-//				billPage.getBillPageController().resetTableOrder();
-//				billPage.getBillPageController().loadTableOrder();
-				//End load lại hóa đơn bên trang hóa đơn
 			}
 		}
 	}
 
+	@Transactional
+	public Order getOrderById(int id) {
+		Order order = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("cannot found id"));
+		Hibernate.initialize(order.getOrderDetails());
+		return order;
+	}
+
+	@Transactional
 	private void cancel() {
 		int row = sellPage.getOrderJTable().getSelectedRow();
 		if (row < 0) {
@@ -75,28 +102,19 @@ public class SellPageController implements ActionListener, MouseListener {
 		} else {
 			int option = showConfirm("Thông báo", "Xác nhận hủy?", JOptionPane.YES_NO_OPTION);
 			if (option == JOptionPane.YES_OPTION) {
-//				OrderDAO orderDAO = new OrderDAO();
-//				int id = Integer.parseInt(sellPage.getOrderJTable().getValueAt(row, 0).toString());
-//				Order order = orderDAO.getOrder("id", id);
-//
-//				//Xóa bên bảng order detail trước
-//				OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
-//				orderDetailDAO.deleteOrderDetail(order.getId());
-//				//End xóa bên bảng order detail trước
-//
-//				//Xóa bên bảng Order
-//				orderDAO.deleteOrder(order.getId());
-//				//End xóa bên bảng order
-//
-//				//Cập nhật lại status cho card
-//				CardDAO cardDAO = new CardDAO();
-//				cardDAO.updateStatus(order.getCard().getId(), true);
-				//End cập nhật lại status cho card
-				
+				int id = Integer.parseInt(sellPage.getOrderJTable().getValueAt(row, 0).toString());
+
+				Order order = this.getOrderById(id);
+
+				Card card = order.getCard();
+				card.setStatus(true);//make the tag available again
+				cardRepository.save(card);
+				cardNumberPage.update();
+
+				orderRepository.deleteById(id);//delete the order itself
 				sellPage.getDfOrderTableModel().removeRow(row);
+				billPage.loadTableOrder();
 				resetTableDrink();
-//				billPage.getBillPageController().resetTableOrder();
-//				billPage.getBillPageController().loadTableOrder();
 			}
 		}
 	}
@@ -109,10 +127,10 @@ public class SellPageController implements ActionListener, MouseListener {
 		sellPage.getDrinkJTable().repaint();
 	}
 	
-	public void resetTableOrder() {
-		sellPage.getDfOrderTableModel().setRowCount(0);
-		sellPage.getOrderJTable().repaint();
-	}
+//	public void resetTableOrder() {
+//		sellPage.getDfOrderTableModel().setRowCount(0);
+//		sellPage.getOrderJTable().repaint();
+//	}
 	//End reset table
 	
 	//Show message

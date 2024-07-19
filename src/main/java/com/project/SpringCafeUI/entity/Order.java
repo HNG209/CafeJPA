@@ -33,15 +33,18 @@ public class Order {
     @Column(columnDefinition = "TEXT", nullable = true)
     private String description;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "card_id")
-    private Card card;
+    private Card card;//many orders can have the same card number
 
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order",
+            fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<OrderDetail> orderDetails;
 
     public Order(int id, Date date, double totalDue, boolean status, String description, Card card,

@@ -25,6 +25,7 @@ import com.project.SpringCafeUI.repository.OrderDetailRepository;
 import com.project.SpringCafeUI.repository.OrderRepository;
 import com.project.SpringCafeUI.utils.FontSize;
 import com.project.SpringCafeUI.utils.DateTime;
+import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;

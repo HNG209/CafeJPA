@@ -15,6 +15,7 @@ import com.project.SpringCafeUI.entity.OrderDetail;
 import com.project.SpringCafeUI.repository.CardRepository;
 import com.project.SpringCafeUI.repository.OrderDetailRepository;
 import com.project.SpringCafeUI.repository.OrderRepository;
+import com.project.SpringCafeUI.service.OrderService;
 import com.project.SpringCafeUI.view.BillPage;
 import com.project.SpringCafeUI.view.CardNumberPage;
 import com.project.SpringCafeUI.view.SellPage;
@@ -30,19 +31,14 @@ public class SellPageController implements ActionListener, MouseListener {
 	private final BillPage billPage;
 	private final CardNumberPage cardNumberPage;
 
-	private final OrderRepository orderRepository;
-	private final OrderDetailRepository orderDetailRepository;
-	private final CardRepository cardRepository;
-
+	@Autowired
+	private OrderService orderService;
 
 	@Autowired
-	public SellPageController(@Lazy SellPage sellPage, OrderRepository orderRepository, BillPage billPage, CardNumberPage cardNumberPage, OrderDetailRepository orderDetailRepository, CardRepository cardRepository) {
+	public SellPageController(@Lazy SellPage sellPage, BillPage billPage, CardNumberPage cardNumberPage) {
 		this.sellPage = sellPage;
-        this.orderRepository = orderRepository;
         this.billPage = billPage;
         this.cardNumberPage = cardNumberPage;
-        this.orderDetailRepository = orderDetailRepository;
-        this.cardRepository = cardRepository;
     }
 
 	@Override
@@ -65,33 +61,16 @@ public class SellPageController implements ActionListener, MouseListener {
 		} else {
 			int option = showConfirm("Thông báo", "Xác nhận hoàn thành?", JOptionPane.YES_NO_OPTION);
 			if (option == JOptionPane.YES_OPTION) {
-//				OrderDAO orderDAO = new OrderDAO();
 				int id = Integer.parseInt(sellPage.getOrderJTable().getValueAt(row, 0).toString());
-				Order order = orderRepository.findById(id).get();
 
-				order.setStatus(true);//set order status to true(done)
-
-				Card card = order.getCard();
-				card.setStatus(true);
-				cardRepository.save(card);//make the tag available again
-				cardNumberPage.update();
-
-				orderRepository.save(order);
+				orderService.done(id);
 
 				billPage.loadTableOrder();//reload order table on billpage
-
-
+				cardNumberPage.update();
 				sellPage.getDfOrderTableModel().removeRow(row);
 				resetTableDrink();
 			}
 		}
-	}
-
-	@Transactional
-	public Order getOrderById(int id) {
-		Order order = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("cannot found id"));
-		Hibernate.initialize(order.getOrderDetails());
-		return order;
 	}
 
 	@Transactional
@@ -104,35 +83,22 @@ public class SellPageController implements ActionListener, MouseListener {
 			if (option == JOptionPane.YES_OPTION) {
 				int id = Integer.parseInt(sellPage.getOrderJTable().getValueAt(row, 0).toString());
 
-				Order order = this.getOrderById(id);
+				orderService.cancelOrder(id);
 
-				Card card = order.getCard();
-				card.setStatus(true);//make the tag available again
-				cardRepository.save(card);
-				cardNumberPage.update();
-
-				orderRepository.deleteById(id);//delete the order itself
 				sellPage.getDfOrderTableModel().removeRow(row);
 				billPage.loadTableOrder();
+				cardNumberPage.update();
 				resetTableDrink();
 			}
 		}
 	}
-
-	
 
 	//Reset table
 	private void resetTableDrink() {
 		sellPage.getDfDrinkTableModel().setRowCount(0);
 		sellPage.getDrinkJTable().repaint();
 	}
-	
-//	public void resetTableOrder() {
-//		sellPage.getDfOrderTableModel().setRowCount(0);
-//		sellPage.getOrderJTable().repaint();
-//	}
-	//End reset table
-	
+
 	//Show message
 	private void showMessage(String title, String message, int option) {
 		JOptionPane.showMessageDialog(sellPage.getSellPanel(), message, title, option);
@@ -179,6 +145,5 @@ public class SellPageController implements ActionListener, MouseListener {
 		// TODO Auto-generated method stub
 		
 	}
-	
 	
 }

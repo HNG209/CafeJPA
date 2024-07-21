@@ -6,6 +6,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -17,10 +19,9 @@ import javax.swing.table.DefaultTableModel;
 
 import com.project.SpringCafeUI.entity.*;
 import com.project.SpringCafeUI.repository.*;
-import com.project.SpringCafeUI.view.CardNumberPage;
-import com.project.SpringCafeUI.view.Dashboard;
-import com.project.SpringCafeUI.view.HomePage;
-import com.project.SpringCafeUI.view.SellPage;
+import com.project.SpringCafeUI.service.DrinkService;
+import com.project.SpringCafeUI.service.OrderService;
+import com.project.SpringCafeUI.view.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -30,26 +31,22 @@ import org.springframework.stereotype.Component;
 public class HomePageController implements ActionListener, MouseListener, DocumentListener{
 	private final HomePage homePage;
 	private final SellPage sellPage;
-	private final Dashboard dashboard;
+	private final BillPage billPage;
 
-	private final DrinkRepository drinkRepository;
 	private final CardNumberPage cardNumberPage;
-	private final CardRepository cardRepository;
-	private final EmployeeRepository employeeRepository;
-	private final OrderRepository orderRepository;
-	private final OrderDetailRepository orderDetailRepository;
 
 	@Autowired
-	public HomePageController(@Lazy HomePage homePage, SellPage sellPage, DrinkRepository drinkRepository, CardNumberPage cardNumberPage, CardRepository cardRepository, EmployeeRepository employeeRepository, Dashboard dashboard, OrderRepository orderRepository, OrderDetailRepository orderDetailRepository) {
+	private OrderService orderService;
+
+	@Autowired
+	private DrinkService drinkService;
+
+	@Autowired
+	public HomePageController(@Lazy HomePage homePage, SellPage sellPage, BillPage billPage, CardNumberPage cardNumberPage) {
 		this.homePage = homePage;
         this.sellPage = sellPage;
-        this.drinkRepository = drinkRepository;
+        this.billPage = billPage;
         this.cardNumberPage = cardNumberPage;
-        this.cardRepository = cardRepository;
-        this.employeeRepository = employeeRepository;
-        this.dashboard = dashboard;
-        this.orderRepository = orderRepository;
-        this.orderDetailRepository = orderDetailRepository;
     }
 
 	@Override
@@ -213,107 +210,21 @@ public class HomePageController implements ActionListener, MouseListener, Docume
 		}
 		else{
 			int rows = homePage.getDfBillDefaultTableModel().getRowCount();
-
 			if(rows == 0){
 				showMessage("Thông báo", "chưa có món được chọn!", JOptionPane.PLAIN_MESSAGE);
 				return;
 			}
 
-			Date date = Date.valueOf(LocalDate.now());
-			double total = Double.parseDouble(homePage.getTotalValueJLabel().getText().trim());
-			boolean status = false;
-			Card card = cardRepository.findByNumber(Integer.parseInt(homePage.getCardNumberValueJLabel().getText())).get(0);
-			Optional<Employee> employee = employeeRepository.findById(Integer.parseInt(dashboard.getEmployeeIDJLabel().getText()));
+			//save the order through order service
+			orderService.saveOrder();
 
-			//save an order with status is set to false(not done)
-			Order order = new Order();
-
-			order.setDate(date);
-			order.setDescription("");
-			order.setStatus(status);
-			order.setTotalDue(total);
-			order.setCard(card);
-			order.setEmployee(employee.get());
-			orderRepository.save(order);
-
-			//save each order details to an order
-			for(int i = 0; i < rows; i++){
-				String drinkName = homePage.getDfBillDefaultTableModel().getValueAt(i, 0).toString();
-				int quantity = Integer.parseInt(homePage.getDfBillDefaultTableModel().getValueAt(i, 2).toString());
-				Drink drink = drinkRepository.findByName(drinkName).get(0);
-
-				OrderDetail detail = new OrderDetail();
-
-				detail.setDiscount(0.0);
-				detail.setUnitPrice(drink.getUnitPrice());
-				detail.setQuantity(quantity);
-				detail.setDrink(drink);
-				detail.setOrder(order);
-
-				orderDetailRepository.save(detail);
-			}
-
-			card.setStatus(false);
-			cardRepository.save(card);
 			cardNumberPage.update();
 			sellPage.loadTableOrder();//refresh
+			billPage.loadTableOrder();
 			showMessage("Thông báo", "Xác nhận thanh toán thành công", JOptionPane.PLAIN_MESSAGE);
+			homePage.getCardNumberValueJLabel().setText("");
+			homePage.getDfBillDefaultTableModel().setRowCount(0);
 		}
-//		try {
-//
-//			if (homePage.getCardNumberValueJLabel().getText().isBlank()) {
-//				new CardNumberPage();
-//			} else {
-//				Date date = Date.valueOf(LocalDate.now());
-//				double totalDue = Double.parseDouble(homePage.getTotalValueJLabel().getText().trim());
-//				boolean status = false;
-//				String decription = "";
-//				Card card = new CardDAO().getCard("cardNumber", Integer.parseInt(homePage.getCardNumberValueJLabel().getText()));
-//				Dashboard dashboard = Dashboard.getInstance();
-//				Employee employee = new EmployeeDAO().getEmployee("name", dashboard.getNameJLabel().getText());
-//				//Thêm vào orders
-//				OrderDAO orderDAO = new OrderDAO();
-//				Order order = new Order(0, date, totalDue, status, decription, card, employee);
-//				orderDAO.addOrder(order);
-//				//End thêm vào orders
-//
-//				//Cập nhật lại trạng thái của card
-//				CardDAO cardDAO = new CardDAO();
-//				cardDAO.updateStatus(order.getCard().getId(), false);
-//				//End cập nhật lại trạng thái của thẻ
-//
-//				//Thêm các món đặt vào orderDetail
-//				OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
-//				for(int i = 0; i < homePage.getBillJTable().getRowCount(); i++) {
-//					Drink drink = new DrinkDAO().getDrink("name", homePage.getDfBillDefaultTableModel().getValueAt(i, 0).toString());
-//					double unitPrice = Double.parseDouble(homePage.getDfBillDefaultTableModel().getValueAt(i, 1).toString());
-//					int quantity = Integer.parseInt(homePage.getDfBillDefaultTableModel().getValueAt(i, 2).toString());
-//					OrderDetail orderDetail = new OrderDetail(0, unitPrice, quantity, 0, drink, order);
-//					orderDetailDAO.addOrderDetail(orderDetail);
-//				}
-//				//End thêm các món đặt vào orderDetail
-//				showMessage("Thông báo", "Xác nhận thanh toán thành công", JOptionPane.PLAIN_MESSAGE);
-//
-//				//Xuất hóa đơn
-//				new ExportBill(order);
-//				//End xuất hóa đơn
-//
-//				dropAllBill();
-//
-//				//Load lại hóa đơn chờ bên trang Đơn đặt
-//				sellPage.getSellPageController().resetTableOrder();
-//				sellPage.getSellPageController().loadTableOrder();
-//				//End load lại hóa đơn chờ bên trang Đơn đặt
-//
-//				//Load lại hóa đơn bên trang hóa đơn
-//				billPage.getBillPageController().resetTableOrder();
-//				billPage.getBillPageController().loadTableOrder();
-//				//End load lại hóa đơn bên trang hóa đơn
-//			}
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
 	}
 	//End confirm
 
@@ -346,6 +257,7 @@ public class HomePageController implements ActionListener, MouseListener, Docume
 		Object o = e.getSource();
 		DefaultTableModel dfDrink = homePage.getDfDrinkTableModel();
 		DefaultTableModel dfBill = homePage.getDfBillDefaultTableModel();
+
 		if(o.equals(homePage.getBillJTable())) {
 			homePage.getQuantityJTextField().setText(dfBill.getValueAt(homePage.getBillJTable().getSelectedRow(), 2).toString());
 			homePage.getQuantityJTextField().setEditable(true);
@@ -356,15 +268,15 @@ public class HomePageController implements ActionListener, MouseListener, Docume
 		}
 		if(o.equals(homePage.getDrinkJTable())) {
 			int id = Integer.parseInt(dfDrink.getValueAt(homePage.getDrinkJTable().getSelectedRow(), 0).toString().trim());
-			Optional<Drink> drink = drinkRepository.findById(id);
-			if(drink.isPresent()){
-				homePage.getImageJLabel().setIcon(new ImageIcon(String.format(drink.get().getPathImage(), 200)));
-				homePage.getNameJLabel().setText(drink.get().getName());
-				homePage.getUnitPriceJLabel().setText("" + drink.get().getUnitPrice());
-				homePage.getArrowLeftJButton().setEnabled(true);
-				homePage.getArrowRightJButton().setEnabled(true);
-				homePage.getAddJButton().setEnabled(true);
-			}
+
+			Drink drink = drinkService.findDrinkById(id);
+
+			homePage.getImageJLabel().setIcon(new ImageIcon(String.format(drink.getPathImage(), 200)));
+			homePage.getNameJLabel().setText(drink.getName());
+			homePage.getUnitPriceJLabel().setText("" + drink.getUnitPrice());
+			homePage.getArrowLeftJButton().setEnabled(true);
+			homePage.getArrowRightJButton().setEnabled(true);
+			homePage.getAddJButton().setEnabled(true);
 		}
 	}
 

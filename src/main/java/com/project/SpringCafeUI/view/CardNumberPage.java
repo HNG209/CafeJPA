@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import com.project.SpringCafeUI.utils.BackgroundColor;
 import com.project.SpringCafeUI.utils.FontSize;
 import com.project.SpringCafeUI.controller.CardNumberController;
+import jakarta.transaction.Transactional;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -66,6 +67,7 @@ public class CardNumberPage {
         }
     }
 
+    @Transactional
     public void update(){
         for(int i = 0;i < size; i++){
             boolean status = cardNumberController.getCards().get(i).isStatus();

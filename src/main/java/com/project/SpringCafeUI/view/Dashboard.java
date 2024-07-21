@@ -181,17 +181,12 @@ public class Dashboard {
         JPanel contentTitlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 8));
         contentTitlePanel.add(logOutJButton);
 
+        contentTitlePanel.add(nameJLabel);
+
         JLabel line = new JLabel("-");
         line.setFont(FontSize.fontBold16());
         line.setForeground(fontColor);
 
-        JLabel textID = new JLabel("Mã nhân viên:");
-        textID.setFont(FontSize.fontBold16());
-        textID.setForeground(fontColor);
-        contentTitlePanel.add(textID);
-        contentTitlePanel.add(employeeIDJLabel);
-
-        contentTitlePanel.add(nameJLabel);
         contentTitlePanel.setBackground(backgroundColor);
 
         contentTitlePanel.add(line);

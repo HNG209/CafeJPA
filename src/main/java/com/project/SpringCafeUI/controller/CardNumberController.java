@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.project.SpringCafeUI.entity.Card;
-import com.project.SpringCafeUI.entity.Order;
-import com.project.SpringCafeUI.repository.CardRepository;
+import com.project.SpringCafeUI.service.CardService;
 import com.project.SpringCafeUI.view.CardNumberPage;
 import com.project.SpringCafeUI.view.HomePage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +17,15 @@ import org.springframework.stereotype.Component;
 public class CardNumberController implements ActionListener {
 
 	private final CardNumberPage cardNumberPage;
-	private final CardRepository cardRepository;
 
 	private final HomePage homePage;
-	
+
 	@Autowired
-	public CardNumberController(@Lazy CardNumberPage cardNumberPage, CardRepository cardRepository, HomePage homePage) {
+	private CardService cardService;
+
+	@Autowired
+	public CardNumberController(@Lazy CardNumberPage cardNumberPage, HomePage homePage) {
 		this.cardNumberPage = cardNumberPage;
-        this.cardRepository = cardRepository;
         this.homePage = homePage;
 	}
 
@@ -37,6 +37,6 @@ public class CardNumberController implements ActionListener {
 	}
 	
 	public List<Card> getCards() {
-		return cardRepository.findAll();
+		return cardService.getAll();
 	}
 }

@@ -35,7 +35,6 @@ public class DashboardController implements ActionListener, WindowListener{
 		String command = e.getActionCommand();
 		Object source = e.getSource();
 		if (command.equalsIgnoreCase("Trang chủ")) {
-			//new CardNumberPage();
 			cardNumberPage.show();
 		} 
 		dashboard.getCardLayout().show(dashboard.getCardPanel(), command);

@@ -7,14 +7,7 @@ import java.awt.event.MouseListener;
 import java.util.List;
 
 import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
 
-import com.project.SpringCafeUI.entity.Card;
-import com.project.SpringCafeUI.entity.Order;
-import com.project.SpringCafeUI.entity.OrderDetail;
-import com.project.SpringCafeUI.repository.CardRepository;
-import com.project.SpringCafeUI.repository.OrderDetailRepository;
-import com.project.SpringCafeUI.repository.OrderRepository;
 import com.project.SpringCafeUI.service.OrderService;
 import com.project.SpringCafeUI.view.BillPage;
 import com.project.SpringCafeUI.view.CardNumberPage;

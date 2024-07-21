@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 
 import com.project.SpringCafeUI.entity.Account;
 import com.project.SpringCafeUI.repository.AccountRepository;
+import com.project.SpringCafeUI.service.AccountService;
 import com.project.SpringCafeUI.view.Dashboard;
 import com.project.SpringCafeUI.view.LoginPage;
 import jakarta.transaction.Transactional;
@@ -22,13 +23,14 @@ public class LoginController implements ActionListener {
 
 	private final LoginPage loginPage;
 	private final Dashboard dashboard;
-	private final AccountRepository accountRepository;
 
 	@Autowired
-	public LoginController(@Lazy LoginPage loginPage, @Lazy Dashboard dashboard, AccountRepository accountRepository) {
+	private AccountService accountService;
+
+	@Autowired
+	public LoginController(@Lazy LoginPage loginPage, @Lazy Dashboard dashboard) {
 		this.loginPage = loginPage;
         this.dashboard = dashboard;
-        this.accountRepository = accountRepository;
     }
 
 	@Override
@@ -59,9 +61,8 @@ public class LoginController implements ActionListener {
 			return;
 		}
 
-		List<Account> accountList = accountRepository.findByUsernameAndPassword(username, password);
-		if(!accountList.isEmpty()) {
-			Account account = accountList.get(0);
+		if(accountService.validateLogin(username, password)) {
+			Account account = accountService.getAccount();
 			if (account.checkLogin(username, password)) {
 				showMessage("Thông báo", "Đăng nhập thành công", JOptionPane.PLAIN_MESSAGE);
 				loginPage.getFrame().dispose();

@@ -15,6 +15,7 @@ import javax.swing.table.DefaultTableModel;
 
 import com.project.SpringCafeUI.entity.Employee;
 import com.project.SpringCafeUI.repository.EmployeeRepository;
+import com.project.SpringCafeUI.service.EmployeeService;
 import com.project.SpringCafeUI.utils.TextProcessing;
 import com.project.SpringCafeUI.view.EmployeePage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +26,13 @@ import org.springframework.stereotype.Component;
 public class EmployeeController implements ActionListener, MouseListener, DocumentListener {
 
 	private final EmployeePage employeePage;
-	private final EmployeeRepository repository;
 
 	@Autowired
-	public EmployeeController(@Lazy EmployeePage employeePage, EmployeeRepository repository) {
+	private EmployeeService employeeService;
+
+	@Autowired
+	public EmployeeController(@Lazy EmployeePage employeePage) {
         this.employeePage = employeePage;
-        this.repository = repository;
     }
 
 	@Override
@@ -56,7 +58,7 @@ public class EmployeeController implements ActionListener, MouseListener, Docume
 			else return;
 		}
 		if (employee != null) {
-			repository.save(employee);
+			employeeService.save(employee);
 			employeePage.loadTable();
 			showMessage("Thông báo", "Thêm thành công", JOptionPane.PLAIN_MESSAGE);
 		}
@@ -72,7 +74,7 @@ public class EmployeeController implements ActionListener, MouseListener, Docume
 				Employee employee = this.getEmployee();
 				System.out.println(employee);
 				if (employee != null) {
-					repository.save(employee);
+					employeeService.save(employee);
 					employeePage.loadTable();
 					showMessage("Thông báo", "Cập nhật thành công", JOptionPane.PLAIN_MESSAGE);
 				}

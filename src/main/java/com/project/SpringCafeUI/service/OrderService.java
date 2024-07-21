@@ -11,14 +11,15 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private AccountService accountService;
 
     @Autowired
     private OrderDetailRepository orderDetailRepository;
@@ -34,9 +35,6 @@ public class OrderService {
 
     @Autowired
     private HomePage homePage;
-
-    @Autowired
-    private Dashboard dashboard;
 
     @Transactional
     public void cancelOrder(int id){
@@ -70,7 +68,7 @@ public class OrderService {
         double total = Double.parseDouble(homePage.getTotalValueJLabel().getText().trim());
         boolean status = false;
         Card card = cardRepository.findByNumber(Integer.parseInt(homePage.getCardNumberValueJLabel().getText())).get(0);
-        Optional<Employee> employee = employeeRepository.findById(Integer.parseInt(dashboard.getEmployeeIDJLabel().getText()));
+        Employee employee = accountService.getAccount().getEmployee();
 
         Order order = new Order();
 
@@ -79,9 +77,9 @@ public class OrderService {
         order.setStatus(status);
         order.setTotalDue(total);
         order.setCard(card);
-        order.setEmployee(employee.orElseThrow(() -> new IllegalArgumentException("cannot find employee, please check login!")));
+        order.setEmployee(employee);
 
-        List<OrderDetail> orderDetails = new ArrayList<>();
+        Set<OrderDetail> orderDetails = new HashSet<>();
         //save each order details to an order
         for(int i = 0; i < rows; i++){
             String drinkName = homePage.getDfBillDefaultTableModel().getValueAt(i, 0).toString();

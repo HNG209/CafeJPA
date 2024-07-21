@@ -16,6 +16,7 @@ import com.project.SpringCafeUI.entity.Category;
 import com.project.SpringCafeUI.entity.Drink;
 import com.project.SpringCafeUI.repository.CategoryRepository;
 import com.project.SpringCafeUI.repository.DrinkRepository;
+import com.project.SpringCafeUI.service.CategoryService;
 import com.project.SpringCafeUI.utils.ImageDisplay;
 import com.project.SpringCafeUI.utils.TextProcessing;
 import com.project.SpringCafeUI.view.HomePage;
@@ -27,14 +28,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductPageController implements ActionListener, MouseListener, DocumentListener {
 	private final ProductPage productPage;
-	private final CategoryRepository categoryRepository;
 	private final DrinkRepository drinkRepository;
 	private final HomePage homePage;
 
 	@Autowired
-	public ProductPageController(@Lazy ProductPage productPage, CategoryRepository categoryRepository, DrinkRepository drinkRepository, HomePage homePage) {
+	private CategoryService categoryService;
+
+	@Autowired
+	public ProductPageController(@Lazy ProductPage productPage, DrinkRepository drinkRepository, HomePage homePage) {
         this.productPage = productPage;
-        this.categoryRepository = categoryRepository;
         this.drinkRepository = drinkRepository;
         this.homePage = homePage;
     }
@@ -106,8 +108,7 @@ public class ProductPageController implements ActionListener, MouseListener, Doc
 	//Add category
 	private void addCategory() {
 		String value = productPage.getDfCategoryJComboBoxModel().getSelectedItem().toString().trim();
-		if (categoryRepository.findByName(value).isEmpty()){ //if empty then add new
-			categoryRepository.save(new Category(0, value));
+		if (categoryService.addCategory(value)){ //if empty then add new
 			productPage.getDfCategoryJComboBoxModel().addElement(value);
 			productPage.getDfCategorySubJComboBoxModel().addElement(value);
 			showMessage("Thông báo", "Thêm loại sản phẩm thành công", JOptionPane.PLAIN_MESSAGE);
@@ -175,7 +176,7 @@ public class ProductPageController implements ActionListener, MouseListener, Doc
 			return null;
 		}
 		String categtoryString = productPage.getDfCategoryJComboBoxModel().getSelectedItem().toString();
-		Category category = categoryRepository.findByName(categtoryString).get(0);
+		Category category = categoryService.find(categtoryString);
 		String unitPriceString = productPage.getUnitPriceJTextField().getText().trim();
 		double unitPrice = 0;
 		if (unitPriceString.isBlank()) {

@@ -5,9 +5,13 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.sql.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "`order`")
@@ -45,7 +49,8 @@ public class Order {
             fetch = FetchType.EAGER,
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<OrderDetail> orderDetails;
+//    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<OrderDetail> orderDetails = new HashSet<>();
 
     public Order(int id, Date date, double totalDue, boolean status, String description, Card card,
                  Employee employee) {

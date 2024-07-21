@@ -1,7 +1,5 @@
 package com.project.SpringCafeUI;
 
-import com.project.SpringCafeUI.entity.Card;
-import com.project.SpringCafeUI.repository.CardRepository;
 import com.project.SpringCafeUI.view.LoginPage;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

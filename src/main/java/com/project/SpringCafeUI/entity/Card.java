@@ -25,7 +25,7 @@ public class Card {
     @Column(name = "status", nullable = false)
     private boolean status;
 
-    @OneToMany(mappedBy = "card", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.ALL)//đã sửa
     private List<Order> orders;//1 tag can be assigned with many orders
 
     public Card(int number, boolean status) {

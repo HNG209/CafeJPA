@@ -46,7 +46,7 @@ public class Order {
     private Employee employee;
 
     @OneToMany(mappedBy = "order",
-            fetch = FetchType.EAGER,
+                fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval = true)
 //    @OnDelete(action = OnDeleteAction.CASCADE)

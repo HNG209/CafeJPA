@@ -39,7 +39,6 @@ public class OrderService {
     @Transactional
     public void cancelOrder(int id){
         Order order = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("couldn't found order to cancel"));
-
         Card card = order.getCard();
         card.setStatus(true);//make the tag available again
         cardRepository.save(card);

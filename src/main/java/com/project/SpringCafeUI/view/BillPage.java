@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.time.LocalDate;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -256,6 +257,11 @@ public class BillPage {
     public void loadTableOrder() {
         dfOrderTableModel.setRowCount(0);
         orderRepository.findAll().forEach(this::loadOneRowOrder);
+    }
+
+    public void loadTableOrder(List<Order> list){
+        dfOrderTableModel.setRowCount(0);
+        list.forEach(this::loadOneRowOrder);
     }
 
     private void loadOneRowDrink(OrderDetail orderDetail) {

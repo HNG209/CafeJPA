@@ -37,13 +37,18 @@ public class OrderService {
     private HomePage homePage;
 
     @Transactional
-    public void cancelOrder(int id){
+    public void cancelOrder(int id){//delete an order and all of its details, make the tag available again
         Order order = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("couldn't found order to cancel"));
         Card card = order.getCard();
         card.setStatus(true);//make the tag available again
         cardRepository.save(card);
 
         orderRepository.delete(order);
+    }
+
+    @Transactional
+    public List<Order> findByDate(Integer day, Integer month, Integer year){
+        return orderRepository.findByDate(day, month, year);
     }
 
     @Transactional

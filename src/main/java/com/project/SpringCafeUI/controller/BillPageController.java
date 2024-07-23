@@ -5,17 +5,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.time.LocalDate;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
 
 import com.project.SpringCafeUI.entity.Order;
-import com.project.SpringCafeUI.entity.OrderDetail;
+import com.project.SpringCafeUI.service.OrderService;
 import com.project.SpringCafeUI.view.BillPage;
-import com.project.SpringCafeUI.view.SellPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -27,13 +23,15 @@ public class BillPageController implements ActionListener, MouseListener {
     //private SellPage sellPage;
 
     @Autowired
+    private OrderService orderService;
+
+    @Autowired
     public BillPageController(@Lazy BillPage billPage) {
         this.billPage = billPage;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.out.println("click");
         Object source = e.getSource();
         if (source.equals(billPage.getMmJComboBox())) {
             selectMonthJComboBox();
@@ -53,52 +51,37 @@ public class BillPageController implements ActionListener, MouseListener {
         boolean monthCheck = billPage.getMonthJChecked().isSelected();
         boolean yearCheck = billPage.getYearJChecked().isSelected();
 
-//        if (!dayCheck && !monthCheck && !yearCheck) {
-//            resetTableDrink();
-//            resetTableOrder();
-//            loadTableOrder();
-//        } else {
-//            int day = dayCheck ? Integer.parseInt(billPage.getDdDefaultComboBoxModel().getSelectedItem().toString()) : -1;
-//            int month = monthCheck ? Integer.parseInt(billPage.getMmDefaultComboBoxModel().getSelectedItem().toString()) : -1;
-//            int year = yearCheck ? Integer.parseInt(billPage.getYyDefaultComboBoxModel().getSelectedItem().toString()) : -1;
-//
-//            OrderDAO orderDAO = new OrderDAO();
-//
-//            List<Order> list = orderDAO.getOrdersByDate(day, month, year);
-//
-//            resetTableOrder();
-//            resetTableDrink();
-//            list.stream().forEach(
-//                    order -> loadOneRowOrder(billPage.getDfOrderTableModel(), order)
-//            );
-//        }
+        if (!dayCheck && !monthCheck && !yearCheck) {
+            resetTableDrink();
+            resetTableOrder();
+            billPage.loadTableOrder();
+        } else {
+            Integer day = dayCheck ? Integer.parseInt(billPage.getDdDefaultComboBoxModel().getSelectedItem().toString()) : null;
+            Integer month = monthCheck ? Integer.parseInt(billPage.getMmDefaultComboBoxModel().getSelectedItem().toString()) : null;
+            Integer year = yearCheck ? Integer.parseInt(billPage.getYyDefaultComboBoxModel().getSelectedItem().toString()) : null;
+
+            List<Order> list = orderService.findByDate(day, month, year);
+
+            billPage.loadTableOrder(list);
+
+            resetTableDrink();
+        }
     }
 
     private void delete() {
         int row = billPage.getOrderJTable().getSelectedRow();
         int id = Integer.parseInt(billPage.getDfOrderTableModel().getValueAt(row, 0).toString());
 
-//        OrderDAO orderDAO = new OrderDAO();
-//        OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
-//
-//        int option = showConfirm("Lưu ý", "Bạn chắc chắn muốn xóa?", JOptionPane.YES_NO_OPTION);
-//
-//        if (option == JOptionPane.YES_OPTION) {
-//            Order order = orderDAO.getOrder("id", id);
-//
-//            orderDetailDAO.deleteOrderDetail(id);
-//            orderDAO.deleteOrder(id);
-//            showMessage("Thông báo", "Xóa thành công", JOptionPane.PLAIN_MESSAGE);
-//            resetTableOrder();
-//            resetTableDrink();
-//            loadTableOrder();
-//            sellPage = SellPage.getInstace();
-//            sellPage.getSellPageController().resetTableOrder();
-//            sellPage.getSellPageController().loadTableOrder();
-//
-//            CardDAO cardDAO = new CardDAO();
-//            cardDAO.updateStatus(order.getCard().getId(), true);
-//        }
+
+        int option = showConfirm("Lưu ý", "Bạn chắc chắn muốn xóa?", JOptionPane.YES_NO_OPTION);
+
+        if (option == JOptionPane.YES_OPTION) {
+            orderService.cancelOrder(id);
+
+            showMessage("Thông báo", "Xóa thành công", JOptionPane.PLAIN_MESSAGE);
+            billPage.loadTableOrder();
+            resetTableDrink();
+        }
     }
 
     private void selectMonthJComboBox() {

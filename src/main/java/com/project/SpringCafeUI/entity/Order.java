@@ -1,10 +1,7 @@
 package com.project.SpringCafeUI.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -18,6 +15,7 @@ import java.util.Set;
 @Setter
 @Getter
 @NoArgsConstructor
+@ToString
 public class Order {
 
     @Id

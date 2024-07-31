@@ -1,11 +1,6 @@
 package com.project.SpringCafeUI.view;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -22,6 +17,7 @@ import com.project.SpringCafeUI.utils.BackgroundColor;
 import com.project.SpringCafeUI.utils.BorderRadius;
 import com.project.SpringCafeUI.utils.DateTime;
 import com.project.SpringCafeUI.utils.FontSize;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,15 +61,18 @@ public class Dashboard {
         this.billPage = billPage;
         this.productPage = productPage;
         this.employeePage = employeePage;
-        this.frame = new JFrame("Dashboard");
         show();
     }
 
+    @PostConstruct
     public void show(){
-        this.setComponents();
-        this.setLocations();
-        this.setJFrame();
-        this.addActionListener();
+        if (!GraphicsEnvironment.isHeadless()) {
+            this.frame = new JFrame("Dashboard");
+            this.setComponents();
+            this.setLocations();
+            this.setJFrame();
+            this.addActionListener();
+        }
     }
 
     private void setLocations() {

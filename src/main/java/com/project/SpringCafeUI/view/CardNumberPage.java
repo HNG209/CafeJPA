@@ -1,10 +1,7 @@
 package com.project.SpringCafeUI.view;
 
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GridLayout;
+import java.awt.*;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -13,6 +10,7 @@ import javax.swing.JPanel;
 import com.project.SpringCafeUI.utils.BackgroundColor;
 import com.project.SpringCafeUI.utils.FontSize;
 import com.project.SpringCafeUI.controller.CardNumberController;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,20 +27,27 @@ public class CardNumberPage {
     private final Color textColor = Color.WHITE;
     private final CardNumberController cardNumberController;
     private final int size;
-    private final JFrame frame;
+    private JFrame frame;
 
     private final HomePage homePage;
 
     @Autowired
     public CardNumberPage(@Lazy CardNumberController cardNumberController, HomePage homePage) {
-        size = cardNumberController.getCards().size();
         this.cardNumberController = cardNumberController;
         this.homePage = homePage;
+        size = cardNumberController.getCards().size();
         buttons = new JButton[size];
-        frame = new JFrame("Tag number");
-        this.setJButtons();
-        this.setCenter();
-        this.setJFrame();
+        init();
+    }
+
+    @PostConstruct
+    private void init(){
+        if (!GraphicsEnvironment.isHeadless()) {
+            frame = new JFrame("Tag number");
+            this.setJButtons();
+            this.setCenter();
+            this.setJFrame();
+        }
     }
 
     private void setCenter() {

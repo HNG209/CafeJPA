@@ -28,6 +28,7 @@ import com.project.SpringCafeUI.repository.CategoryRepository;
 import com.project.SpringCafeUI.repository.DrinkRepository;
 import com.project.SpringCafeUI.utils.BorderRadius;
 import com.project.SpringCafeUI.utils.FontSize;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,11 @@ public class HomePage {
         this.categoryRepository = categoryRepository;
         this.drinkRepository = drinkRepository;
         homePanel = new JPanel();
+        init();
+    }
+
+    @PostConstruct
+    private void init(){
         this.setJPanel();
         this.setComponents();
         this.setLocations();

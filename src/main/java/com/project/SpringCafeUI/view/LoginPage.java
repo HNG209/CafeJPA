@@ -1,9 +1,7 @@
 package com.project.SpringCafeUI.view;
 
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
+import java.awt.*;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -39,13 +37,15 @@ public class LoginPage{
     @Autowired
     public LoginPage(@Lazy LoginController controller){
         this.loginController = controller;
-        frame = new JFrame("Login");
     }
 
     public void show(){
-        this.setComponents();
-        this.setLocations();
-        this.setJFrame();
+        if (!GraphicsEnvironment.isHeadless()) {
+            frame = new JFrame("Login");
+            this.setComponents();
+            this.setLocations();
+            this.setJFrame();
+        }
     }
 
     private void setLocations() {
